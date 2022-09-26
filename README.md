@@ -116,4 +116,24 @@ import {authClient} from "@/utils/getAgent/identity";
 
 ### ISP
 - [`get_user_icsps()`](#get_user_icsps)
+- [`get_sub_account()`](#get_sub_account)
+- [`get_icp_balance()`](#get_icp_balance)
+- [`transfer_out_icp()`](#transfer_out_icp)
+- [`create_icsp_topup_by_xtc()`](#create_icsp_topup_by_xtc)
+- [`create_icsp_topup_by_icp()`](#create_icsp_topup_by_icp)
+- [`transfer_out_icp()`](#transfer_out_icp)
+
+#### `get_user_icsps()`
+
+```typescript
+get_user_icsps(): Promise<icsp[]>
+export declare type icsp = [string, Principal];
+```
+
+#### `get_sub_account()`
+#### `get_icp_balance()`
+#### `transfer_out_icp()`
+#### `create_icsp_topup_by_xtc()`
+#### `create_icsp_topup_by_icp()`
+#### `transfer_out_icp()`
 
