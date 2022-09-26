@@ -171,3 +171,80 @@ export declare type createByIcpArg = {
 };
 ```
 
+### ISP
+- [`get_cycle_balance()`](#get_cycle_balance)
+- [`init()`](#init)
+- [`allFiles()`](#allFiles)
+- [`getAllArFileKey()`](#getAllArFileKey)
+- [`getAllIcFileKey()`](#getAllIcFileKey)
+- [`getAllIpfsFileKey()`](#getAllIpfsFileKey)
+- [`recordFile()`](#recordFile)
+- [`get_icsp_buckets()`](#get_icsp_buckets)
+- [`store_file()`](#store_file)
+- [`get_file()`](#get_file)
+
+#### `get_cycle_balance()`
+```typescript
+get_cycle_balance(): Promise<bigint>
+```
+#### `init()`
+```typescript
+init(): Promise<LiveBucketExt>
+export interface LiveBucketExt {
+    'used_memory': bigint;
+    'canister_id': Principal;
+}
+```
+#### `allFiles()`
+```typescript
+allFiles(): Promise<allFiles>
+export declare type allFiles = {
+    ArFiles: string[];
+    ICFiles: string[];
+    IPFSFiles: string[];
+}
+```
+#### `getAllArFileKey()`
+```typescript
+getAllArFileKey(): Promise<string[]>
+```
+#### `getAllIcFileKey()`
+```typescript
+getAllIcFileKey(): Promise<string[]>
+```
+#### `getAllIpfsFileKey()`
+```typescript
+getAllIpfsFileKey(): Promise<string[]>
+```
+#### `recordFile()`
+```typescript
+recordFile(OtherFile: OtherFile): Promise<unknown>
+export interface OtherFile {
+    'file_location': FileLocation;
+    'file_key': string;
+    'file_url': string;
+    'file_type': string;
+}
+```
+#### `get_icsp_buckets()`
+```typescript
+get_icsp_buckets(): Promise<getBucketsRes>;
+export declare type getBucketsRes = [] | [Buckets]
+export interface Buckets {
+    'old_buckets': Array<Principal>;
+    'live_buckets': Array<LiveBucketExt__1>;
+}
+export interface LiveBucketExt__1 {
+    'used_memory': bigint;
+    'canister_id': Principal;
+}
+```
+#### `store_file()`
+```typescript
+store_file(files: File[], is_http_open: boolean): Promise<void>
+```
+#### `get_file()`
+```typescript
+get_file(fileKey: string): Promise<Blob>
+```
+
