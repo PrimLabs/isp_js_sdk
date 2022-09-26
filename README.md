@@ -121,7 +121,6 @@ import {authClient} from "@/utils/getAgent/identity";
 - [`transfer_out_icp()`](#transfer_out_icp)
 - [`create_icsp_topup_by_xtc()`](#create_icsp_topup_by_xtc)
 - [`create_icsp_topup_by_icp()`](#create_icsp_topup_by_icp)
-- [`transfer_out_icp()`](#transfer_out_icp)
 
 #### `get_user_icsps()`
 
@@ -129,11 +128,46 @@ import {authClient} from "@/utils/getAgent/identity";
 get_user_icsps(): Promise<icsp[]>
 export declare type icsp = [string, Principal];
 ```
-
+Returns all created icsp
 #### `get_sub_account()`
+```typescript
+get_sub_account(): Promise<string>;
+```
 #### `get_icp_balance()`
+```typescript
+get_icp_balance(): Promise<bigint>;
+```
 #### `transfer_out_icp()`
+```typescript
+transfer_out_icp(accountAdress: string, amount: {
+        e8s: bigint;
+    }): Promise<bigint>;
+```
+Transfer icp in subAccount to other account
 #### `create_icsp_topup_by_xtc()`
+```typescript
+create_icsp_topup_by_xtc(createArgs: createByXTCArg): Promise<CreateRes>;
+export declare type createByXTCArg = {
+    icspName: string;
+    icp_to_create_amount: {
+        e8s: bigint;
+    };
+    xtc_to_topup_amount: {
+        e8s: bigint;
+    };
+};
+```
 #### `create_icsp_topup_by_icp()`
-#### `transfer_out_icp()`
+```typescript
+create_icsp_topup_by_icp(createArgs: createByIcpArg): Promise<Result_1>
+export declare type createByIcpArg = {
+    icspName: string;
+    icp_to_create_amount: {
+        e8s: bigint;
+    };
+    icp_to_topup_amount: {
+        e8s: bigint;
+    };
+};
+```
 
