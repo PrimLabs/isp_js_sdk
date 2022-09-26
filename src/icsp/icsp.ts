@@ -73,7 +73,7 @@ export class ICSP {
 
   async getAllIpfsFileKey(): Promise<string[]> {
     try {
-      return await this.ICSPActor.getAllIcFileKey() as Array<string>
+      return await this.ICSPActor.getAllIpfsFileKey() as Array<string>
     } catch (e) {
       throw e
     }
