@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es2018",
+    "module": "commonjs",
+    "declaration": true, // 根据ts文件自动生成.d.ts声明文件和js文件
+    "emitDeclarationOnly": false, // 只输出.d.ts声明文件，不生成js文件
+    "outDir": "./dist", // 输出目录
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "lib": ["ES2019", "DOM", "esnext"],
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "skipLibCheck": true
+  }
+}
