@@ -7,6 +7,15 @@ export const idlFactory = ({IDL}) => {
     'old_buckets': IDL.Vec(IDL.Principal),
     'live_buckets': IDL.Vec(LiveBucketExt__1),
   });
+  const FileBufExt = IDL.Record({
+    'bucket_id': IDL.Principal,
+    'total_index': IDL.Nat,
+    'wrote_page': IDL.Vec(IDL.Bool),
+    'file_type': IDL.Text,
+    'is_http_open': IDL.Bool,
+    'total_size': IDL.Nat64,
+    'received': IDL.Nat,
+  });
   const FileLocation__1 = IDL.Variant({
     'IPFS': IDL.Null,
     'Arweave': IDL.Null,
@@ -77,6 +86,7 @@ export const idlFactory = ({IDL}) => {
     ),
     'getBuckets': IDL.Func([], [IDL.Opt(Buckets)], ['query']),
     'getCycleBalance': IDL.Func([], [IDL.Nat], ['query']),
+    'getFileInfo': IDL.Func([IDL.Text], [IDL.Opt(FileBufExt)], ['query']),
     'getOtherFile': IDL.Func(
       [IDL.Text, FileLocation__1],
       [IDL.Opt(OtherFile)],

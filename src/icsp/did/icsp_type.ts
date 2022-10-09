@@ -12,6 +12,16 @@ export interface CallbackToken {
   'index': bigint,
 }
 
+export interface FileBufExt {
+  'bucket_id': Principal,
+  'total_index': bigint,
+  'wrote_page': Array<boolean>,
+  'file_type': string,
+  'is_http_open': boolean,
+  'total_size': bigint,
+  'received': bigint,
+}
+
 export type FileLocation = { 'IPFS': null } |
   { 'Arweave': null };
 export type FileLocation__1 = { 'IPFS': null } |
@@ -78,6 +88,7 @@ export interface icsp {
   'getBucketOfFile': ActorMethod<[string], [] | [Principal]>,
   'getBuckets': ActorMethod<[], [] | [Buckets]>,
   'getCycleBalance': ActorMethod<[], bigint>,
+  'getFileInfo': ActorMethod<[string], [] | [FileBufExt]>,
   'getOtherFile': ActorMethod<[string, FileLocation__1], [] | [OtherFile]>,
   'http_request': ActorMethod<[HttpRequest], HttpResponse>,
   'init': ActorMethod<[], LiveBucketExt>,

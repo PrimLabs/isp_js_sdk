@@ -25,7 +25,7 @@ export class Bucket {
     return File
   }
 
-  public async get_file(fileKey: string): Promise<Blob> {
+  public async get_file(fileKey: string): Promise<Blob | string> {
     try {
       const queryPromiseArr: Array<Promise<any>> = []
       const dataArr: Array<Array<number>> = []
@@ -48,6 +48,7 @@ export class Bucket {
         console.log(dataArr)
         const metadata = await this.getFile(dataArr, fileSize)
         console.log(metadata)
+        if (fileType === "text/plain") return new TextDecoder().decode(metadata)
         return new Blob([metadata.buffer], {
           type: fileType,
         })

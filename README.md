@@ -241,10 +241,10 @@ export interface LiveBucketExt__1 {
 ```
 #### `store_file()`
 ```typescript
-store_file(files: File[], is_http_open: boolean): Promise<void>
+store_file(files: File[] | string[], is_http_open: boolean): Promise<boolean>
 ```
 #### `get_file()`
 ```typescript
-get_file(fileKey: string): Promise<Blob>
+get_file(fileKey: string): Promise<Blob | string>
 ```
 

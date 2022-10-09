@@ -2,7 +2,7 @@ import {idlFactory as ICSPIDL} from "./did/icsp"
 import {Actor, ActorMethod, ActorSubclass, HttpAgent} from "@dfinity/agent";
 import {allFiles, getBucketOfFileRes, getBucketsRes} from "../types";
 import {nanoid} from 'nanoid'
-import {LiveBucketExt, OtherFile, StoreArgs} from "./did/icsp_type";
+import {FileBufExt, LiveBucketExt, OtherFile, StoreArgs} from "./did/icsp_type";
 import {Bucket} from "../bucket";
 
 const chunkSize = 1992288
@@ -50,6 +50,14 @@ export class ICSP {
         ICFiles: allFiles[1],
         IPFSFiles: allFiles[2]
       }
+    } catch (e) {
+      throw e
+    }
+  }
+
+  async getFileInfo(key: string): Promise<FileBufExt> {
+    try {
+      return await this.ICSPActor.getFileInfo(key) as FileBufExt
     } catch (e) {
       throw e
     }
@@ -113,15 +121,35 @@ export class ICSP {
     }
   }
 
-  /*
-  * @argument:
-  *   files:files to upload
-  *   is_http_open:Is it possible to access via http
-  *@return :null
-  * */
-  public async store_file(files: File[], is_http_open: boolean) {
-    const Actor = this.ICSPActor
+  public async storeString(dataArr: string[], is_http_open: boolean): Promise<boolean> {
     try {
+      const Actor = this.ICSPActor
+      const allPromise: Array<any> = []
+      for (let i = 0; i < dataArr.length; i++) {
+        const file = dataArr[i]
+        const key = nanoid()
+        const data = new TextEncoder().encode(file);
+        const arg: StoreArgs = {
+          key,
+          value: data,
+          file_type: "text/plain",
+          index: BigInt(0),
+          total_index: BigInt(1),
+          total_size: BigInt(data.length),
+          is_http_open
+        }
+        allPromise.push(Actor.store(arg))
+      }
+      await Promise.all(allPromise)
+      return true
+    } catch (e) {
+      throw  e
+    }
+  }
+
+  public async storeBlob(files: File[], is_http_open: boolean): Promise<boolean> {
+    try {
+      const Actor = this.ICSPActor
       const allPromise: Array<any> = []
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
@@ -153,13 +181,12 @@ export class ICSP {
                 total_size: BigInt(total_size),
                 is_http_open
               }
-              console.log(arg)
               allPromise.push(Actor.store(arg))
             }
             if (i === files.length - 1) {
               console.log(allPromise)
               await Promise.all(allPromise)
-              return 0
+              return true
             }
           } else loadChunk()
         };
@@ -171,12 +198,31 @@ export class ICSP {
         };
         loadChunk();
       }
+      return false
     } catch (e) {
       throw e
     }
   }
 
-  public async get_file(fileKey: string): Promise<Blob> {
+  /*
+  * @argument:
+  *   metadata:metadata to upload
+  *   is_http_open:Is it possible to access via http
+  *@return :null
+  * */
+  public async store_file(metadata: File[] | string[], is_http_open: boolean): Promise<boolean> {
+    try {
+      if (typeof (metadata[0]) === "string") {
+        return await this.storeString(metadata as string[], is_http_open)
+      } else {
+        return await this.storeBlob(metadata as File[], is_http_open)
+      }
+    } catch (e) {
+      throw e
+    }
+  }
+
+  public async get_file(fileKey: string): Promise<Blob | string> {
     try {
       const bucket = (await this.get_bucket_of_file(fileKey))[0]
       if (bucket) {
