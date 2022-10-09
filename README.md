@@ -175,6 +175,7 @@ export declare type createByIcpArg = {
 - [`get_cycle_balance()`](#get_cycle_balance)
 - [`init()`](#init)
 - [`allFiles()`](#allFiles)
+- [`getFileInfo()`](#getFileInfo)
 - [`getAllArFileKey()`](#getAllArFileKey)
 - [`getAllIcFileKey()`](#getAllIcFileKey)
 - [`getAllIpfsFileKey()`](#getAllIpfsFileKey)
@@ -202,6 +203,19 @@ export declare type allFiles = {
     ArFiles: string[];
     ICFiles: string[];
     IPFSFiles: string[];
+}
+```
+#### `getFileInfo()`
+```typescript
+getFileInfo(key: string): Promise<FileBufExt>;
+export interface FileBufExt {
+  'bucket_id': Principal,
+  'total_index': bigint,
+  'wrote_page': Array<boolean>,
+  'file_type': string,
+  'is_http_open': boolean,
+  'total_size': bigint,
+  'received': bigint,
 }
 ```
 #### `getAllArFileKey()`
