@@ -121,13 +121,15 @@ export class ICSP {
     }
   }
 
-  public async storeString(dataArr: string[], is_http_open: boolean): Promise<boolean> {
+  public async storeString(dataArr: string[], is_http_open: boolean): Promise<string[]> {
     try {
+      const keyArr: Array<string> = []
       const Actor = this.ICSPActor
       const allPromise: Array<any> = []
       for (let i = 0; i < dataArr.length; i++) {
         const file = dataArr[i]
         const key = nanoid()
+        keyArr.push(key)
         const data = new TextEncoder().encode(file);
         const arg: StoreArgs = {
           key,
@@ -141,19 +143,21 @@ export class ICSP {
         allPromise.push(Actor.store(arg))
       }
       await Promise.all(allPromise)
-      return true
+      return keyArr
     } catch (e) {
       throw  e
     }
   }
 
-  public async storeBlob(files: File[], is_http_open: boolean): Promise<boolean> {
+  public async storeBlob(files: File[], is_http_open: boolean): Promise<string[]> {
     try {
+      const keyArr: Array<string> = []
       const Actor = this.ICSPActor
       const allPromise: Array<any> = []
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
         const key = nanoid()
+        keyArr.push(key)
         const total_size = file.size
         const total_index = Math.ceil(total_size / chunkSize)
         const file_type = file.type
@@ -186,7 +190,7 @@ export class ICSP {
             if (i === files.length - 1) {
               console.log(allPromise)
               await Promise.all(allPromise)
-              return true
+              return keyArr
             }
           } else loadChunk()
         };
@@ -198,7 +202,7 @@ export class ICSP {
         };
         loadChunk();
       }
-      return false
+      return keyArr
     } catch (e) {
       throw e
     }
@@ -210,7 +214,7 @@ export class ICSP {
   *   is_http_open:Is it possible to access via http
   *@return :null
   * */
-  public async store_file(metadata: File[] | string[], is_http_open: boolean): Promise<boolean> {
+  public async store_file(metadata: File[] | string[], is_http_open: boolean): Promise<string[]> {
     try {
       if (typeof (metadata[0]) === "string") {
         return await this.storeString(metadata as string[], is_http_open)
