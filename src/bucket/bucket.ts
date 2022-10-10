@@ -35,19 +35,15 @@ export class Bucket {
         queryPromiseArr.push(this.BucketActor.get(fileKey, BigInt(i)))
       }
       const res = (await Promise.all(queryPromiseArr)) as Array<getRes>
-      console.log("query result: ", res)
       if (res[0][0]) {
         const fileType = res[0][0][1]
-        console.log(fileType)
         res.forEach(e => {
           if (e[0]) {
             dataArr.push(e[0][0])
             fileSize += e[0][0].length
           }
         })
-        console.log(dataArr)
         const metadata = await this.getFile(dataArr, fileSize)
-        console.log(metadata)
         if (fileType === "text/plain") return new TextDecoder().decode(metadata)
         return new Blob([metadata.buffer], {
           type: fileType,

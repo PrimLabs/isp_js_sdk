@@ -188,7 +188,6 @@ export class ICSP {
               allPromise.push(Actor.store(arg))
             }
             if (i === files.length - 1) {
-              console.log(allPromise)
               await Promise.all(allPromise)
               return keyArr
             }

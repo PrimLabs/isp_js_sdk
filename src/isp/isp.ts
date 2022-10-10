@@ -124,67 +124,6 @@ export class ISP {
     }
   }
 
-  // public async topUpCaiByXTC(principal: Principal, icp_amount: { e8s: bigint }): Promise<BurnResult> {
-  //   try {
-  //     const wicpBalance = await this.IcpToWicp(icp_amount.e8s)
-  //     await this.WicpToXTC(await this.agent.getPrincipal(), wicpBalance)
-  //     const xtcBalance = Number(await this.getXTCBalance())
-  //     return (await this.top_up_icsp_with_xtc(principal, BigInt(xtcBalance - 2 * 1e9))) as BurnResult
-  //   } catch (e) {
-  //     throw e
-  //   }
-  // }
-
-  // public async getXTCBalance(): Promise<bigint> {
-  //   try {
-  //     const XTCActor = await this.getXTCActor()
-  //     const balance = (await XTCActor.balance()) as bigint
-  //     console.log("xtc balance", balance)
-  //     return balance
-  //   } catch (e) {
-  //     throw e
-  //   }
-  // }
-  //
-  // public async IcpToWicp(icpAmount: bigint): Promise<bigint> {
-  //   try {
-  //     const ledgerActor = await this.getLedgerActor()
-  //     const WicpActor = await this.getWICPActor()
-  //     const WicpAccount = getUint8ArrayFromHex(WICPAccount)
-  //     const fee: ICP = {e8s: BigInt(10000)};
-  //     const res = (await ledgerActor.transfer({
-  //       to: Array.from(WicpAccount),
-  //       fee: fee,
-  //       memo: 0,
-  //       from_subaccount: [],
-  //       created_at_time: [],
-  //       amount: {e8s: icpAmount},
-  //     })) as TransferResult | any;
-  //     console.log("transfer result", res);
-  //     if (res.Ok) {
-  //       const blockHeight = res.Ok as bigint
-  //       const wicp = (await WicpActor.mint([], blockHeight)) as Result | any
-  //       console.log("wicp amount", wicp)
-  //       const wicpBalance = (await WicpActor.balanceOf(await this.agent.getPrincipal())) as bigint
-  //       console.log("wicp balance", wicpBalance)
-  //       if (wicpBalance) return wicpBalance
-  //       else throw new Error(Object.keys(wicp.Err)[0])
-  //     } else throw new Error(Object.keys(res.Err)[0])
-  //   } catch (e) {
-  //     throw e
-  //   }
-  // }
-  //
-  // public async WicpToXTC(principal: Principal, amount: bigint) {
-  //   try {
-  //     const XTCActor = await this.getXTCActor()
-  //     const mintXTC = (await XTCActor.mint(principal, amount)) as MintResult | any
-  //     console.log("mint XTC", mintXTC)
-  //     if (mintXTC.Err) throw new Error(Object.keys(mintXTC.Err)[0])
-  //   } catch (e) {
-  //     throw e
-  //   }
-  // }
 
   public async top_up_icsp_with_xtc(canisterId: Principal, amount: bigint): Promise<BurnResult> {
     try {
@@ -212,20 +151,5 @@ export class ISP {
       throw e
     }
   }
-
-  //
-  // public async transfer(icpAmount: bigint, account: string) {
-  //   const ledgerActor = await this.getLedgerActor()
-  //   const fee: ICP = {e8s: BigInt(10000)};
-  //   const res = (await ledgerActor.transfer({
-  //     to: Array.from(getUint8ArrayFromHex(account)),
-  //     fee: fee,
-  //     memo: 0,
-  //     from_subaccount: [],
-  //     created_at_time: [],
-  //     amount: {e8s: icpAmount},
-  //   })) as TransferResult | any;
-  //   console.log("transfer result", res);
-  // }
 
 }
