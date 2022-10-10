@@ -2,7 +2,6 @@ import {idlFactory as bucketIDL} from "./did/bucket"
 import {Actor, ActorMethod, ActorSubclass, HttpAgent} from "@dfinity/agent";
 import {getRes} from "../types";
 
-
 export class Bucket {
   private readonly bucketCanisterId: string
   private readonly BucketActor: ActorSubclass<Record<string, ActorMethod<unknown[], unknown>>>

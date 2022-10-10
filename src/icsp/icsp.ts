@@ -153,54 +153,54 @@ export class ICSP {
     try {
       const keyArr: Array<string> = []
       const Actor = this.ICSPActor
-      const allPromise: Array<any> = []
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i]
-        const key = nanoid()
-        keyArr.push(key)
-        const total_size = file.size
-        const total_index = Math.ceil(total_size / chunkSize)
-        const file_type = file.type
-        let start = 0;
-        let currentChunk = 0;
-        const allData: Array<Uint8Array> = []
-        let blobSlice = //@ts-ignore
-          File.prototype.slice ||
-          //@ts-ignore
-          File.prototype.mozSlice ||
-          //@ts-ignore
-          File.prototype.webkitSlice;
-        let reader = new FileReader();
-        reader.onload = async function (e: any) {
-          const data = new Uint8Array(e.target.result)
-          allData.push(data)
-          if (currentChunk === total_index) {
-            for (let i = 0; i < allData.length; i++) {
-              const arg: StoreArgs = {
-                key,
-                value: allData[i],
-                file_type,
-                index: BigInt(i),
-                total_index: BigInt(total_index),
-                total_size: BigInt(total_size),
-                is_http_open
+      const allPromise: Array<any> = files.map(file => {
+        return new Promise((resolve, reject) => {
+          const key = nanoid()
+          keyArr.push(key)
+          const total_size = file.size
+          const total_index = Math.ceil(total_size / chunkSize)
+          const file_type = file.type
+          let start = 0;
+          let currentChunk = 0;
+          const allData: Array<Uint8Array> = []
+          let blobSlice = //@ts-ignore
+            File.prototype.slice ||
+            //@ts-ignore
+            File.prototype.mozSlice ||
+            //@ts-ignore
+            File.prototype.webkitSlice;
+          let reader = new FileReader();
+          reader.onload = async function (e: any) {
+            const data = new Uint8Array(e.target.result)
+            allData.push(data)
+            if (currentChunk === total_index) {
+              for (let i = 0; i < allData.length; i++) {
+                const arg: StoreArgs = {
+                  key,
+                  value: allData[i],
+                  file_type,
+                  index: BigInt(i),
+                  total_index: BigInt(total_index),
+                  total_size: BigInt(total_size),
+                  is_http_open
+                }
+                resolve(Actor.store(arg))
               }
-              allPromise.push(Actor.store(arg))
-            }
-            if (i === files.length - 1) {
-              await Promise.all(allPromise)
-              return keyArr
-            }
-          } else loadChunk()
-        };
-        const loadChunk = () => {
-          const end = start + chunkSize;
-          currentChunk++;
-          reader.readAsArrayBuffer(blobSlice.call(file, start, end));
-          start = end;
-        };
-        loadChunk();
-      }
+            } else loadChunk()
+          };
+          reader.onerror = (error) => {
+            reject(error);
+          };
+          const loadChunk = () => {
+            const end = start + chunkSize;
+            currentChunk++;
+            reader.readAsArrayBuffer(blobSlice.call(file, start, end));
+            start = end;
+          };
+          loadChunk();
+        })
+      })
+      await Promise.all(allPromise)
       return keyArr
     } catch (e) {
       throw e

@@ -1,6 +1,6 @@
 {
   "name": "js-isp",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "",
   "main": "index.js",
   "types": "index.d.ts",
@@ -33,6 +33,7 @@
     "@dfinity/agent": "^0.11.3",
     "@dfinity/candid": "^0.11.3",
     "@dfinity/principal": "^0.11.0",
+    "buffer": "^6.0.3",
     "nanoid": "^4.0.0"
   }
 }
