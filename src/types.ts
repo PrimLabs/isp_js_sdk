@@ -1,5 +1,5 @@
 import {Principal} from "@dfinity/principal";
-import {Buckets} from "./icsp/did/icsp_type";
+import {Buckets, FileBufExt} from "./icsp/did/icsp_type";
 import {Result_1} from "./isp/did/isp/isp_type";
 import {BurnResult} from "./isp/did/xtc/xtc_type";
 
@@ -18,6 +18,8 @@ export type createByIcpArg = {
 }
 
 export type getBucketOfFileRes = [] | [Principal]
+
+export type getFileInfoRes = [] | [FileBufExt]
 
 export type getBucketsRes = [] | [Buckets]
 

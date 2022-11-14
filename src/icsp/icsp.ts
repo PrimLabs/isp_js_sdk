@@ -1,11 +1,11 @@
 import {idlFactory as ICSPIDL} from "./did/icsp"
 import {Actor, ActorMethod, ActorSubclass, HttpAgent} from "@dfinity/agent";
-import {allFiles, getBucketOfFileRes, getBucketsRes} from "../types";
+import {allFiles, getBucketOfFileRes, getBucketsRes, getFileInfoRes} from "../types";
 import {nanoid} from 'nanoid'
-import {FileBufExt, LiveBucketExt, OtherFile, StoreArgs} from "./did/icsp_type";
+import {OtherFile, Result, StoreArgs} from "./did/icsp_type";
 import {Bucket} from "../bucket";
 
-const chunkSize = 1992288
+const chunkSize = 2031616
 
 export class ICSP {
   private readonly agent: HttpAgent
@@ -18,14 +18,6 @@ export class ICSP {
     this.ICSPActor = Actor.createActor(ICSPIDL, {agent, canisterId: this.icspCanisterId})
   }
 
-  async getBucketActor(canisterId: string): Promise<ActorSubclass<Record<string, ActorMethod<unknown[], unknown>>>> {
-    try {
-      return Actor.createActor(ICSPIDL, {agent: this.agent, canisterId})
-    } catch (e) {
-      throw e
-    }
-  }
-
   async get_cycle_balance(): Promise<bigint> {
     try {
       return (await this.ICSPActor.getCycleBalance()) as bigint
@@ -34,9 +26,9 @@ export class ICSP {
     }
   }
 
-  async init(): Promise<LiveBucketExt> {
+  async init(): Promise<Result> {
     try {
-      return await this.ICSPActor.init() as LiveBucketExt
+      return await this.ICSPActor.init() as Result
     } catch (e) {
       throw e
     }
@@ -55,9 +47,9 @@ export class ICSP {
     }
   }
 
-  async getFileInfo(key: string): Promise<FileBufExt> {
+  async getFileInfo(key: string): Promise<getFileInfoRes> {
     try {
-      return await this.ICSPActor.getFileInfo(key) as FileBufExt
+      return await this.ICSPActor.getFileInfo(key) as getFileInfoRes
     } catch (e) {
       throw e
     }
@@ -121,14 +113,14 @@ export class ICSP {
     }
   }
 
-  public async storeString(dataArr: string[], is_http_open: boolean): Promise<string[]> {
+  public async storeString(dataArr: string[], is_http_open: boolean, key_arr?: string[]): Promise<string[]> {
     try {
       const keyArr: Array<string> = []
       const Actor = this.ICSPActor
       const allPromise: Array<any> = []
       for (let i = 0; i < dataArr.length; i++) {
         const file = dataArr[i]
-        const key = nanoid()
+        const key = key_arr ? key_arr[i] : nanoid()
         keyArr.push(key)
         const data = new TextEncoder().encode(file);
         const arg: StoreArgs = {
@@ -149,57 +141,66 @@ export class ICSP {
     }
   }
 
-  public async storeBlob(files: File[], is_http_open: boolean): Promise<string[]> {
+  private async FileRead(file: File | Blob): Promise<Uint8Array[]> {
+    try {
+      return new Promise((resolve, reject) => {
+        let start = 0;
+        let currentChunk = 0;
+        const total_index = Math.ceil(file.size / chunkSize)
+        const allData: Array<Uint8Array> = []
+        let blobSlice = //@ts-ignore
+          File.prototype.slice ||
+          //@ts-ignore
+          File.prototype.mozSlice ||
+          //@ts-ignore
+          File.prototype.webkitSlice;
+        let reader = new FileReader();
+        reader.onload = async function (e: any) {
+          allData.push(new Uint8Array(e.target.result))
+          if (currentChunk === total_index) return resolve(allData)
+          else loadChunk()
+        }
+        reader.onerror = (error) => {
+          reject(error)
+        }
+        const loadChunk = () => {
+          const end = start + chunkSize;
+          currentChunk++;
+          reader.readAsArrayBuffer(blobSlice.call(file, start, end));
+          start = end;
+        };
+        loadChunk();
+      })
+    } catch (e) {
+      throw e
+    }
+  }
+
+  public async storeBlob(files: File[], is_http_open: boolean, key_arr?: string[]): Promise<string[]> {
     try {
       const keyArr: Array<string> = []
       const Actor = this.ICSPActor
-      const allPromise: Array<any> = files.map(file => {
-        return new Promise((resolve, reject) => {
-          const key = nanoid()
-          keyArr.push(key)
-          const total_size = file.size
-          const total_index = Math.ceil(total_size / chunkSize)
-          const file_type = file.type
-          let start = 0;
-          let currentChunk = 0;
-          const allData: Array<Uint8Array> = []
-          let blobSlice = //@ts-ignore
-            File.prototype.slice ||
-            //@ts-ignore
-            File.prototype.mozSlice ||
-            //@ts-ignore
-            File.prototype.webkitSlice;
-          let reader = new FileReader();
-          reader.onload = async function (e: any) {
-            const data = new Uint8Array(e.target.result)
-            allData.push(data)
-            if (currentChunk === total_index) {
-              for (let i = 0; i < allData.length; i++) {
-                const arg: StoreArgs = {
-                  key,
-                  value: allData[i],
-                  file_type,
-                  index: BigInt(i),
-                  total_index: BigInt(total_index),
-                  total_size: BigInt(total_size),
-                  is_http_open
-                }
-                resolve(Actor.store(arg))
-              }
-            } else loadChunk()
-          };
-          reader.onerror = (error) => {
-            reject(error);
-          };
-          const loadChunk = () => {
-            const end = start + chunkSize;
-            currentChunk++;
-            reader.readAsArrayBuffer(blobSlice.call(file, start, end));
-            start = end;
-          };
-          loadChunk();
-        })
-      })
+      const allPromise: Array<any> = []
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        const key = key_arr ? key_arr[i] : nanoid()
+        keyArr.push(key)
+        const total_size = file.size
+        const total_index = Math.ceil(total_size / chunkSize)
+        const allData = await this.FileRead(file)
+        for (let i = 0; i < allData.length; i++) {
+          const arg: StoreArgs = {
+            key,
+            value: allData[i],
+            file_type: file.type,
+            index: BigInt(i),
+            total_index: BigInt(total_index),
+            total_size: BigInt(total_size),
+            is_http_open
+          }
+          allPromise.push(Actor.store(arg))
+        }
+      }
       await Promise.all(allPromise)
       return keyArr
     } catch (e) {
@@ -213,13 +214,34 @@ export class ICSP {
   *   is_http_open:Is it possible to access via http
   *@return :null
   * */
-  public async store_file(metadata: File[] | string[], is_http_open: boolean): Promise<string[]> {
+  public async store_file(metadata: (File | string)[], is_http_open: boolean, key_arr?: string[]): Promise<string[]> {
     try {
+      if (key_arr && metadata.length !== key_arr.length) throw new Error("文件数组和key数组长度不一")
       if (typeof (metadata[0]) === "string") {
-        return await this.storeString(metadata as string[], is_http_open)
+        return await this.storeString(metadata as string[], is_http_open, key_arr)
       } else {
-        return await this.storeBlob(metadata as File[], is_http_open)
+        return await this.storeBlob(metadata as File[], is_http_open, key_arr)
       }
+    } catch (e) {
+      throw e
+    }
+  }
+
+  public async update_data(key: string, new_data: string | File, is_http_open: boolean): Promise<boolean> {
+    try {
+      await this.delete_file(key)
+      const update_res = await this.store_file([new_data], is_http_open, [key])
+      return update_res[0] === key;
+    } catch (e) {
+      throw e
+    }
+  }
+
+
+  public async delete_file(file_key: string) {
+    try {
+      const Actor = this.ICSPActor
+      return await Actor.delete(file_key)
     } catch (e) {
       throw e
     }

@@ -59,7 +59,7 @@ export class ISP {
 
   public async get_icp_balance(): Promise<bigint> {
     try {
-      return (await this.ISPActor.getICPBalance()) as bigint
+      return (await this.ISPActor.getUserSubAccountICPBalance()) as bigint
     } catch (e) {
       throw e
     }
@@ -68,7 +68,7 @@ export class ISP {
   public async transfer_out_icp(accountAdress: string, amount: { e8s: bigint }): Promise<bigint> {
     try {
       const u8Account = getUint8ArrayFromHex(accountAdress)
-      return (await this.ISPActor.transferOutICP(Array.from(u8Account), amount.e8s)) as bigint
+      return (await this.ISPActor.transferOutUserSubAccountICP(Array.from(u8Account), amount.e8s)) as bigint
     } catch (e) {
       throw e
     }
@@ -149,6 +149,14 @@ export class ISP {
       return (await this.ISPActor.topUpICSP(topUpArg)) as Result
     } catch (e) {
       throw e
+    }
+  }
+
+  public async getVersion(): Promise<string> {
+    try {
+      return (await this.ISPActor.getVersion()) as string
+    } catch (e) {
+      throw  e
     }
   }
 
