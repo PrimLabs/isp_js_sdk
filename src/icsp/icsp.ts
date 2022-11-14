@@ -260,4 +260,12 @@ export class ICSP {
       throw e
     }
   }
+
+  public async getVersion(): Promise<string> {
+    try {
+      return (await this.ICSPActor.getVersion()) as string
+    } catch (e) {
+      throw e
+    }
+  }
 }
